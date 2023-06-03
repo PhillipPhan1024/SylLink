@@ -8,6 +8,7 @@ import io
 # Figure out how to handle tables that leak through multiple pages
 #    - Creating two tables first and have an option to combine?
 #    - Find a feature in tabula that does the first - for me.
+#    - Use Tabula API if exists?
 
 
 # Read the only the page 3 of the file
@@ -17,7 +18,7 @@ quizzes = read_pdf('./SylLink/Test_Syllabus.pdf',pages = [3],
 print(quizzes)
 
 # Transform the result into a string table format
-# table = tabulate(quizzes)
+table = tabulate(quizzes)
 
 # Transform the table into dataframe
 # df = pd.read_fwf(io.StringIO(table))
