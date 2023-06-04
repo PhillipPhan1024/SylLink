@@ -13,17 +13,25 @@ import io
 
 # Read the only the page 3 of the file
 quizzes = read_pdf('./SylLink/Test_Syllabus.pdf',pages = [3], 
-                         multiple_tables = False, lattice = True, stream=True, area=[])
+                         multiple_tables = False, lattice = True, stream=True)
 
-print(quizzes)
+# print(quizzes)
+
+df = quizzes[0]
+df = df[df["Quiz"].str.contains("Quiz") == True]
+print(df)
+
 
 # Transform the result into a string table format
-table = tabulate(quizzes)
+# table = tabulate(df)
+
+# print(table)
+
 
 # Transform the table into dataframe
 # df = pd.read_fwf(io.StringIO(table))
 
 
 
-# Save the final result as excel file
-# df.to_excel("./SylLink/Test_Syallbus.xlsx")
+# # Save the final result as excel file
+df.to_excel("./SylLink/Test_Syallbus.xlsx")
