@@ -9,6 +9,7 @@ import io
 #    - Creating two tables first and have an option to combine?
 #    - Find a feature in tabula that does the first - for me.
 #    - Use Tabula API if exists?
+#    - Figure a way to make table into notion.
 
 
 # Read the only the page 3 of the file
