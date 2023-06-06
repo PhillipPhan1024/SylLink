@@ -12,30 +12,24 @@ import io
 #    - Figure a way to make table into notion.
 
 def create_checklist_table(dataframe):
-    table = [[f"<input type='checkbox' disabled {'checked' if status else ''}>"] + row.tolist() for status, row in zip(dataframe['Status'], dataframe.iloc[:, 1:].itertuples(index=False))]
-    headers = ["Status"] + list(dataframe.columns)[1:]
-    return tabulate(table, headers=headers, tablefmt="html")
-
-# Example usage
-
+    status_col = ["[ ]"] * len(dataframe)  # Initialize status column with unchecked boxes
+    table = [[status] + row for status, row in zip(status_col, dataframe.values.tolist())]
+    headers = ["Status"] + list(dataframe.columns)
+    return tabulate(table, headers=headers, tablefmt="grid")
 
 def main():
-    # Read the only the page 3 of the file
-    quizzes = read_pdf('./SylLink/Test_Syllabus.pdf',pages = [3], 
-                            multiple_tables = False, lattice = True, stream=True)
-
-    # print(quizzes)
-
+    # Read only page 3 of the file
+    quizzes = read_pdf('./SylLink/Test_Syllabus.pdf', pages=[3], multiple_tables=False, lattice=True, stream=True)
     df = quizzes[0]
-    df = df[df["Quiz"].str.contains("Quiz") == True]
-    # print(df)
+    df = df[df["Quiz"].str.contains("Quiz")]
+    df.rename(columns={'Completion': 'Status'}, inplace=True)
     
-    df = pd.DataFrame(df)
     check_list = create_checklist_table(df)
     print(check_list)
 
 if __name__ == "__main__":
     main()
+
 
 # Transform the result into a string table format
 # table = tabulate(df)
