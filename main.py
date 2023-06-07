@@ -11,24 +11,76 @@ import io
 #    - Use Tabula API if exists?
 #    - Figure a way to make table into notion.
 
-def create_checklist_table(dataframe):
-    status_col = ["[ ]"] * len(dataframe)  # Initialize status column with unchecked boxes
-    table = [[status] + row for status, row in zip(status_col, dataframe.values.tolist())]
-    headers = ["Status"] + list(dataframe.columns)
-    return tabulate(table, headers=headers, tablefmt="grid")
+def generate_checklist_table(dataframe):
+    # Generate the HTML table
+    checklist_table = ""
+    for _, row in dataframe.iterrows():
+        checklist_table += "<tr>"
+        checklist_table += f"<td><input type='checkbox'></td>"
+        for value in row.values[0:]:
+            checklist_table += f"<td>{value}</td>"
+        checklist_table += "</tr>"
+
+    return checklist_table
+
+
+def generate_html_file(dataframe, filename):
+    checklist_table = generate_checklist_table(dataframe)
+    headers = "\n".join([f"<th>{header}</th>" for header in dataframe.columns])
+
+    html_content = f"""
+    <html>
+    <head>
+        <title>Checklist Table</title>
+        <style>
+            table {{
+                border-collapse: collapse;
+                width: 100%;
+            }}
+            th, td {{
+                padding: 8px;
+                text-align: left;
+            }}
+            th {{
+                background-color: #f2f2f2;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Checklist Table</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Complete</th>
+                    {headers}
+                </tr>
+            </thead>
+            <tbody>
+                {checklist_table}
+            </tbody>
+        </table>
+    </body>
+    </html>
+    """
+
+    with open(filename, "w") as file:
+        file.write(html_content)
+
 
 def main():
     # Read only page 3 of the file
     quizzes = read_pdf('./SylLink/Test_Syllabus.pdf', pages=[3], multiple_tables=False, lattice=True, stream=True)
     df = quizzes[0]
     df = df[df["Quiz"].str.contains("Quiz")]
-    df.rename(columns={'Completion': 'Status'}, inplace=True)
-    
-    check_list = create_checklist_table(df)
-    print(check_list)
+    generate_html_file(df, "checklist.html")
+
 
 if __name__ == "__main__":
     main()
+
+
+
+
 
 
 # Transform the result into a string table format
