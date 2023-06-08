@@ -14,9 +14,9 @@ import io
 def generate_checklist_table(dataframe):
     # Generate the HTML table
     checklist_table = ""
-    for _, row in dataframe.iterrows():
+    for index, row in dataframe.iterrows():
         checklist_table += "<tr>"
-        checklist_table += f"<td><input type='checkbox'></td>"
+        checklist_table += f"<td><input type='checkbox' onclick='toggleRow(this, {index})'></td>"
         for value in row.values[0:]:
             checklist_table += f"<td>{value}</td>"
         checklist_table += "</tr>"
@@ -44,7 +44,21 @@ def generate_html_file(dataframe, filename):
             th {{
                 background-color: #f2f2f2;
             }}
+            .completed {{
+                background-color: green;
+            }}
         </style>
+        <script>
+            function toggleRow(checkbox, row) {{
+                var table = checkbox.closest('table');
+                var rows = table.getElementsByTagName('tr');
+                if (checkbox.checked) {{
+                    rows[row + 1].classList.add('completed');
+                }} else {{
+                    rows[row + 1].classList.remove('completed');
+                }}
+            }}
+        </script>
     </head>
     <body>
         <h1>Checklist Table</h1>
@@ -77,10 +91,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
 
 
 # Transform the result into a string table format
