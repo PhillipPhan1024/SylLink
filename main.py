@@ -6,10 +6,10 @@ import io
 #TODO:
 # Have an area selector to create accurate tables 
 # Figure out how to handle tables that leak through multiple pages
-#    - Creating two tables first and have an option to combine?
-#    - Find a feature in tabula that does the first - for me.
-#    - Use Tabula API if exists?
-#    - Figure a way to make table into notion.
+#    - Have a feature saying need to select over multiple pages, then combine after selection
+# Find a feature in tabula that does the first - for me.
+# Use Tabula API if exists? (this is in order to make more accurate selection of table)
+# Figure a way to make table into notion (Done but need to figure out better way)
 
 def generate_checklist_table(dataframe):
     # Generate the HTML table
