@@ -1,62 +1,84 @@
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
-import tabula
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
+from PyQt5.QtCore import Qt
 import fitz
 
-class PDFSelectionTool:
+
+class PdfViewer(QMainWindow):
     def __init__(self, pdf_path):
+        super().__init__()
         self.pdf_path = pdf_path
-        self.selected_areas = []
-        self.fig, self.ax = plt.subplots()
-        self.page_number = 1
-        self.image = self.extract_page_image(self.page_number)
-        self.ax.imshow(self.image)
-        self.rect = Rectangle((0, 0), 0, 0, linewidth=1, edgecolor='r', facecolor='none')
-        self.ax.add_patch(self.rect)
-        self.fig.canvas.mpl_connect('button_press_event', self.on_click)
-        self.fig.canvas.mpl_connect('motion_notify_event', self.on_move)
-        plt.show()
+        self.page_index = 0
+        self.roi_start_pos = None
+        self.roi_end_pos = None
 
- 
+        self.init_ui()
 
-    def extract_page_image(self, page_number):
+    def init_ui(self):
+        self.setWindowTitle('PDF Viewer')
+        self.pdf_widget = QLabel(self)
+        self.setCentralWidget(self.pdf_widget)
+
+        self.load_pdf()
+        self.show()
+
+    def load_pdf(self):
         doc = fitz.open(self.pdf_path)
-        page = doc.load_page(page_number - 1)
-        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-        image = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(image)
+        page = doc[self.page_index]
+        pixmap = self.get_page_pixmap(page)
+        self.pdf_widget.setPixmap(pixmap)
+
+    def get_page_pixmap(self, page):
+        zoom = 1.0
+        mat = fitz.Matrix(zoom, zoom)
+        pix = page.get_pixmap(matrix=mat)
+        img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(img)
         return pixmap
 
-    def on_click(self, event):
-        if event.button == 1:
-            self.selected_areas.append((event.xdata, event.ydata))
-            self.update_plot()
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
 
-    def on_move(self, event):
-        if event.button == 1:
-            self.rect.set_width(event.xdata - self.rect.get_x())
-            self.rect.set_height(event.ydata - self.rect.get_y())
-            self.update_plot()
+        if self.roi_start_pos and self.roi_end_pos:
+            painter.drawRect(self.roi_start_pos.x(), self.roi_start_pos.y(),
+                             self.roi_end_pos.x() - self.roi_start_pos.x(),
+                             self.roi_end_pos.y() - self.roi_start_pos.y())
 
-    def update_plot(self):
-        self.ax.clear()
-        self.ax.imshow(self.image)
-        for x, y in self.selected_areas:
-            self.ax.add_patch(Rectangle((x, y), 10, 10, linewidth=1, edgecolor='r', facecolor='none'))
-        self.ax.add_patch(self.rect)
-        plt.draw()
+    def mousePressEvent(self, event):
+        if event.buttons() == Qt.LeftButton:
+            self.roi_start_pos = event.pos()
+            self.roi_end_pos = None
+            self.update()
 
-    def generate_pdf(self):
-        output_filename = "selected_areas.pdf"
-        c = canvas.Canvas(output_filename, pagesize=letter)
-        for x, y in self.selected_areas:
-            c.rect(x, y, 10, 10, stroke=1, fill=0)
-        c.save()
-        print(f"PDF file '{output_filename}' generated successfully.")
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and self.roi_start_pos:
+            self.roi_end_pos = event.pos()
+            self.update()
 
-if __name__ == "__main__":
-    pdf_path = "path_to_your_pdf_file.pdf"
-    selection_tool = PDFSelectionTool(pdf_path)
-    selection_tool.generate_pdf()
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Right:
+            self.next_page()
+        elif event.key() == Qt.Key_Left:
+            self.previous_page()
+
+    def next_page(self):
+        doc = fitz.open(self.pdf_path)
+        if self.page_index + 1 < doc.page_count:
+            self.page_index += 1
+            self.load_pdf()
+
+    def previous_page(self):
+        if self.page_index > 0:
+            self.page_index -= 1
+            self.load_pdf()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    pdf_path = 'Test_Syllabus.pdf'
+    viewer = PdfViewer(pdf_path)
+    sys.exit(app.exec_())
