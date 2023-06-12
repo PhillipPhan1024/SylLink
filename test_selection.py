@@ -1,33 +1,44 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 import fitz
 
 
-class PdfViewer(QMainWindow):
-    def __init__(self, pdf_path):
-        super().__init__()
-        self.pdf_path = pdf_path
+class PdfWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.pdf_path = ''
         self.page_index = 0
         self.roi_start_pos = None
         self.roi_end_pos = None
+        self.setMinimumSize(QSize(800, 600))  # Set a minimum size
 
-        self.init_ui()
-
-    def init_ui(self):
-        self.setWindowTitle('PDF Viewer')
-        self.pdf_widget = QLabel(self)
-        self.setCentralWidget(self.pdf_widget)
-
-        self.load_pdf()
-        self.show()
-
-    def load_pdf(self):
+    def load_pdf(self, pdf_path):
+        self.pdf_path = pdf_path
         doc = fitz.open(self.pdf_path)
         page = doc[self.page_index]
         pixmap = self.get_page_pixmap(page)
-        self.pdf_widget.setPixmap(pixmap)
+        self.setFixedSize(pixmap.size())  # Adjust the size of the PdfWidget to match the pixmap
+        self.update()
+
+    def paintEvent(self, event):
+        if not self.pdf_path:
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        doc = fitz.open(self.pdf_path)
+        page = doc[self.page_index]
+        pixmap = self.get_page_pixmap(page)
+        painter.drawPixmap(self.rect(), pixmap)
+
+        if self.roi_start_pos and self.roi_end_pos:
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            painter.drawRect(self.roi_start_pos.x(), self.roi_start_pos.y(),
+                             self.roi_end_pos.x() - self.roi_start_pos.x(),
+                             self.roi_end_pos.y() - self.roi_start_pos.y())
 
     def get_page_pixmap(self, page):
         zoom = 1.0
@@ -36,17 +47,6 @@ class PdfViewer(QMainWindow):
         img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(img)
         return pixmap
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-
-        if self.roi_start_pos and self.roi_end_pos:
-            painter.drawRect(self.roi_start_pos.x(), self.roi_start_pos.y(),
-                             self.roi_end_pos.x() - self.roi_start_pos.x(),
-                             self.roi_end_pos.y() - self.roi_start_pos.y())
 
     def mousePressEvent(self, event):
         if event.buttons() == Qt.LeftButton:
@@ -59,22 +59,44 @@ class PdfViewer(QMainWindow):
             self.roi_end_pos = event.pos()
             self.update()
 
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Right:
-            self.next_page()
-        elif event.key() == Qt.Key_Left:
-            self.previous_page()
-
     def next_page(self):
+        if not self.pdf_path:
+            return
+
         doc = fitz.open(self.pdf_path)
         if self.page_index + 1 < doc.page_count:
             self.page_index += 1
-            self.load_pdf()
+            self.update()
 
     def previous_page(self):
+        if not self.pdf_path:
+            return
+
         if self.page_index > 0:
             self.page_index -= 1
-            self.load_pdf()
+            self.update()
+
+
+class PdfViewer(QMainWindow):
+    def __init__(self, pdf_path):
+        super().__init__()
+        self.pdf_path = pdf_path
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle('PDF Viewer')
+        self.pdf_widget = PdfWidget(self)
+        self.setCentralWidget(self.pdf_widget)
+
+        self.pdf_widget.load_pdf(self.pdf_path)
+        self.resize(self.pdf_widget.size())  # Adjust the size of the main window to match the PdfWidget
+        self.show()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_D:
+            self.pdf_widget.next_page()
+        elif event.key() == Qt.Key_A:
+            self.pdf_widget.previous_page()
 
 
 if __name__ == '__main__':
