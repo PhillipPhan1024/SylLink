@@ -58,6 +58,15 @@ class PdfWidget(QWidget):
         if event.button() == Qt.LeftButton and self.roi_start_pos:
             self.roi_end_pos = event.pos()
             self.update()
+            self.print_rectangle_coordinates()
+
+    def print_rectangle_coordinates(self):
+        if self.roi_start_pos and self.roi_end_pos:
+            x1 = min(self.roi_start_pos.x(), self.roi_end_pos.x())
+            y1 = min(self.roi_start_pos.y(), self.roi_end_pos.y())
+            x2 = max(self.roi_start_pos.x(), self.roi_end_pos.x())
+            y2 = max(self.roi_start_pos.y(), self.roi_end_pos.y())
+            print(f"Rectangle Coordinates: ({x1}, {y1}), ({x2}, {y2})")
 
     def next_page(self):
         if not self.pdf_path:
