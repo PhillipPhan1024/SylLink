@@ -83,7 +83,7 @@ def generate_html_file(dataframe, filename):
 
 def main():
     # Read only page 3 of the file
-    quizzes = read_pdf('Test_Syllabus.pdf', pages=[5], multiple_tables=False, lattice=True, stream=True)
+    quizzes = read_pdf('Test_Syllabus.pdf', pages=[5], multiple_tables=False, lattice=True, stream=True, area=[187, 51, 495, 575])
     df = quizzes[0]
     # df = df[df["Quiz"].str.contains("Quiz")]
     generate_html_file(df, "checklist.html")

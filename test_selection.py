@@ -1,7 +1,7 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout
 from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QRect, QSize
 import fitz
 
 
@@ -36,9 +36,16 @@ class PdfWidget(QWidget):
 
         if self.roi_start_pos and self.roi_end_pos:
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-            painter.drawRect(self.roi_start_pos.x(), self.roi_start_pos.y(),
-                             self.roi_end_pos.x() - self.roi_start_pos.x(),
-                             self.roi_end_pos.y() - self.roi_start_pos.y())
+            painter.drawRect(self.get_roi_rectangle())
+
+    def get_roi_rectangle(self):
+        if self.roi_start_pos and self.roi_end_pos:
+            x = min(self.roi_start_pos.x(), self.roi_end_pos.x())
+            y = min(self.roi_start_pos.y(), self.roi_end_pos.y())
+            width = abs(self.roi_end_pos.x() - self.roi_start_pos.x())
+            height = abs(self.roi_end_pos.y() - self.roi_start_pos.y())
+            return QRect(x, y, width, height)
+        return QRect()
 
     def get_page_pixmap(self, page):
         zoom = 1.0
@@ -57,16 +64,19 @@ class PdfWidget(QWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and self.roi_start_pos:
             self.roi_end_pos = event.pos()
-            self.update()
             self.print_rectangle_coordinates()
+            self.update()
 
     def print_rectangle_coordinates(self):
         if self.roi_start_pos and self.roi_end_pos:
-            x1 = min(self.roi_start_pos.x(), self.roi_end_pos.x())
-            y1 = min(self.roi_start_pos.y(), self.roi_end_pos.y())
-            x2 = max(self.roi_start_pos.x(), self.roi_end_pos.x())
-            y2 = max(self.roi_start_pos.y(), self.roi_end_pos.y())
-            print(f"Rectangle Coordinates: ({x1}, {y1}), ({x2}, {y2})")
+            y = min(self.roi_start_pos.y(), self.roi_end_pos.y())
+            x = min(self.roi_start_pos.x(), self.roi_end_pos.x())
+            height = abs(self.roi_end_pos.y())
+            width = abs(self.roi_end_pos.x())
+            print(f"Top: {y}")
+            print(f"Left: {x}")
+            print(f"Height: {height}")
+            print(f"Width: {width}")
 
     def next_page(self):
         if not self.pdf_path:
