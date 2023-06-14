@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
 from PyQt5.QtCore import Qt, QRect, QSize
 import fitz
 
+coords = []
 
 class PdfWidget(QWidget):
     def __init__(self, parent=None):
@@ -64,19 +65,20 @@ class PdfWidget(QWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and self.roi_start_pos:
             self.roi_end_pos = event.pos()
-            self.print_rectangle_coordinates()
+            coordinates = self.print_rectangle_coordinates()
+            if coordinates:
+                coords.append(coordinates)
             self.update()
+
 
     def print_rectangle_coordinates(self):
         if self.roi_start_pos and self.roi_end_pos:
-            y = min(self.roi_start_pos.y(), self.roi_end_pos.y())
-            x = min(self.roi_start_pos.x(), self.roi_end_pos.x())
+            y = self.roi_start_pos.y()
+            x = self.roi_start_pos.x()
             height = abs(self.roi_end_pos.y())
             width = abs(self.roi_end_pos.x())
-            print(f"Top: {y}")
-            print(f"Left: {x}")
-            print(f"Height: {height}")
-            print(f"Width: {width}")
+            return y, x, height, width 
+        return None
 
     def next_page(self):
         if not self.pdf_path:
@@ -117,9 +119,14 @@ class PdfViewer(QMainWindow):
         elif event.key() == Qt.Key_A:
             self.pdf_widget.previous_page()
 
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    pdf_path = 'Test_Syllabus.pdf'
-    viewer = PdfViewer(pdf_path)
-    sys.exit(app.exec_())
+# def print_coords():
+#     print(coords)
+        
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     pdf_path = 'Test_Syllabus.pdf'
+#     viewer = PdfViewer(pdf_path)
+#     coords = []
+#     app.aboutToQuit.connect(print_coords)
+#     sys.exit(app.exec_())
+    

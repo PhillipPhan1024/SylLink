@@ -1,15 +1,15 @@
 from tabula import read_pdf
 from tabulate import tabulate
 import pandas as pd
+import sys
 import io
+from test_selection import coords as cds
+from test_selection import QApplication, PdfViewer
 
 #TODO:
-# Have an area selector to create accurate tables 
+# Create a GUI system to select page and other features
 # Figure out how to handle tables that leak through multiple pages
 #    - Have a feature saying need to select over multiple pages, then combine after selection
-# Find a feature in tabula that does the first - for me.
-# Use Tabula API if exists? (this is in order to make more accurate selection of table)
-# Figure a way to make table into notion (Done but need to figure out better way)
 
 def generate_checklist_table(dataframe):
     # Generate the HTML table
@@ -83,26 +83,18 @@ def generate_html_file(dataframe, filename):
 
 def main():
     # Read only page 3 of the file
-    quizzes = read_pdf('Test_Syllabus.pdf', pages=[5], multiple_tables=False, lattice=True, stream=True, area=[187, 51, 495, 575])
+    print(coords)
+    quizzes = read_pdf('Test_Syllabus.pdf', pages=[5], multiple_tables=False, lattice=True, stream=True, area=coords)
     df = quizzes[0]
     # df = df[df["Quiz"].str.contains("Quiz")]
     generate_html_file(df, "checklist.html")
 
 
 if __name__ == "__main__":
-    main()
-
-
-# Transform the result into a string table format
-# table = tabulate(df)
-
-# print(table)
-
-
-# Transform the table into dataframe
-# df = pd.read_fwf(io.StringIO(table))
-
-
-
-# # Save the final result as excel file
-# df.to_excel("./SylLink/Test_Syallbus.xlsx")
+    app = QApplication(sys.argv)
+    pdf_path = 'Test_Syllabus.pdf'
+    viewer = PdfViewer(pdf_path)
+    coords = cds
+    app.aboutToQuit.connect(main)
+    sys.exit(app.exec_())
+    
