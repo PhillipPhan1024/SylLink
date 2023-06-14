@@ -67,6 +67,7 @@ class PdfWidget(QWidget):
             self.roi_end_pos = event.pos()
             coordinates = self.print_rectangle_coordinates()
             if coordinates:
+                coords.clear()
                 coords.append(coordinates)
             self.update()
 
