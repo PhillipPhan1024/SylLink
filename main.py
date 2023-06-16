@@ -7,9 +7,13 @@ from test_selection import coords as cds
 from test_selection import QApplication, PdfViewer
 
 #TODO:
-# Create a GUI system to select page and other features
+# Create a GUI system to select page
+#    - Ask if selection is good, if so, close app.
+#    - Ask if need for multiple pages
 # Figure out how to handle tables that leak through multiple pages
 #    - Have a feature saying need to select over multiple pages, then combine after selection
+# CSS
+# Customizable table
 
 def generate_checklist_table(dataframe):
     # Generate the HTML table

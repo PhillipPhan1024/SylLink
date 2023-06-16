@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
 from PyQt5.QtCore import Qt, QRect, QSize
 import fitz
 
-coords = []
+coords = [] # Global coords that changes after a selection is made
 
 class PdfWidget(QWidget):
     def __init__(self, parent=None):
