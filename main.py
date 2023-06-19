@@ -4,7 +4,7 @@ import pandas as pd
 import sys
 import io
 from test_selection import coords as cds
-from test_selection import QApplication, PdfViewer
+from test_selection import QApplication, PdfViewer, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog
 
 #TODO:
 # Create a GUI system to select page
@@ -84,6 +84,15 @@ def generate_html_file(dataframe, filename):
     with open(filename, "w") as file:
         file.write(html_content)
 
+def select_pdf_file():
+    file_path, _ = QFileDialog.getOpenFileName(None, 'Select PDF File', '', 'PDF Files (*.pdf)')
+    if file_path:
+        viewer = PdfViewer(file_path)
+        layout.addWidget(viewer)  # Add the viewer widget to the layout
+        layout.removeWidget(button)  # Remove the button widget from the layout
+        window.setLayout(layout)  # Update the layout on the window
+        return viewer
+    return None
 
 def main():
     # Read only page 3 of the file
@@ -92,13 +101,31 @@ def main():
     df = quizzes[0]
     # df = df[df["Quiz"].str.contains("Quiz")]
     generate_html_file(df, "checklist.html")
-
-
+    
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    pdf_path = 'Test_Syllabus.pdf'
-    viewer = PdfViewer(pdf_path)
+    
     coords = cds
+    
+    window = QWidget()
+    layout = QVBoxLayout()
+    
+    button = QPushButton("Select PDF File")
+    button.clicked.connect(select_pdf_file)
+    layout.addWidget(button)
+
+    window.setLayout(layout)
+    window.show()
+
     app.aboutToQuit.connect(main)
     sys.exit(app.exec_())
+
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
+#     pdf_path = 'Test_Syllabus.pdf'
+#     viewer = PdfViewer(pdf_path)
+#     coords = cds
+#     app.aboutToQuit.connect(main)
+#     sys.exit(app.exec_())
     
