@@ -3,7 +3,7 @@ from tabulate import tabulate
 import pandas as pd
 import sys
 from test_selection import coords as cds
-from test_selection import QApplication, PdfViewer, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog
+from test_selection import QApplication, PdfViewer
 
 #TODO:
 # Create a GUI system to select page
@@ -88,55 +88,21 @@ def generate_html_file(dataframe, filename, css_file="checklist.css"):
     with open(filename, "w") as file:
         file.write(html_content)
 
-def select_pdf_file():
-    file_path, _ = QFileDialog.getOpenFileName(None, "Select PDF File", "", "PDF Files (*.pdf)")
-    if file_path:
-        viewer = PdfViewer(file_path)
-        viewer.setWindowTitle("SylLnk")
-        viewer.setGeometry(100, 100, 800, 600)  # Set the window size
-        viewer.show()
-        return viewer
-    return None
-
 
 def main():
-    viewer = select_pdf_file()
-    if viewer:
-        app.aboutToQuit.connect(
-            lambda: generate_html_file(viewer.pdf_widget.get_dataframe(), "checklist.html")
-        )
-    else:
-        sys.exit()
-
-    app.exec_()
-
-    if coords:
-        print("ROI Coordinates:")
-        for coord in coords:
-            print(coord)
-    else:
-        print("No ROI coordinates selected.")
+    # Read only page 3 of the file
+    print(coords)
+    quizzes = read_pdf('Test_Syllabus.pdf', pages=[3], multiple_tables=False, lattice=True, stream=True, area=coords)
+    df = quizzes[0]
+    # df = df[df["Quiz"].str.contains("Quiz")]
+    generate_html_file(df, "checklist.html")
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setApplicationName("SylLnk")  # Set the program title
-
-    coords = []
-
-    window = QWidget()
-    window.setWindowTitle("SylLnk")  # Set the window title
-    window.setGeometry(100, 100, 600, 400)  # Set the window size
-    layout = QVBoxLayout()
-
-    button = QPushButton("Select PDF File")
-    button.clicked.connect(select_pdf_file)
-    layout.addWidget(button)
-
-    window.setLayout(layout)
-    window.show()
-
+    pdf_path = 'Test_Syllabus.pdf'
+    viewer = PdfViewer(pdf_path)
+    coords = cds
     app.aboutToQuit.connect(main)
     sys.exit(app.exec_())
-
     
