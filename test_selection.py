@@ -4,7 +4,11 @@ from PyQt5.QtCore import Qt, QRect, QSize
 import fitz
 import sys
 
+<<<<<<< HEAD
 coords = []  # Global coords that changes after a selection is made
+=======
+coords = [] 
+>>>>>>> old-project-state2
 
 class PdfWidget(QWidget):
     def __init__(self, page_combobox, parent=None):
@@ -13,41 +17,32 @@ class PdfWidget(QWidget):
         self.page_index = 0
         self.roi_start_pos = None
         self.roi_end_pos = None
+        self.doc = None  # Store the PDF document
         self.setMinimumSize(QSize(800, 600))  # Set a minimum size
         self.page_combobox = page_combobox  # Store the page_combobox
 
     def load_pdf(self, pdf_path):
         self.pdf_path = pdf_path
-        doc = fitz.open(self.pdf_path)
-        page = doc[self.page_index]
+        self.doc = fitz.open(self.pdf_path)  # Load the PDF document
+        page = self.doc[self.page_index]
         pixmap = self.get_page_pixmap(page)
         self.setFixedSize(pixmap.size())  # Adjust the size of the PdfWidget to match the pixmap
         self.update()
 
     def paintEvent(self, event):
-        if not self.pdf_path:
+        if not self.pdf_path or not self.doc:
             return
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        doc = fitz.open(self.pdf_path)
-        page = doc[self.page_index]
+        page = self.doc[self.page_index]
         pixmap = self.get_page_pixmap(page)
         painter.drawPixmap(self.rect(), pixmap)
 
         if self.roi_start_pos and self.roi_end_pos:
             painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
             painter.drawRect(self.get_roi_rectangle())
-
-    def get_roi_rectangle(self):
-        if self.roi_start_pos and self.roi_end_pos:
-            x = min(self.roi_start_pos.x(), self.roi_end_pos.x())
-            y = min(self.roi_start_pos.y(), self.roi_end_pos.y())
-            width = abs(self.roi_end_pos.x() - self.roi_start_pos.x())
-            height = abs(self.roi_end_pos.y() - self.roi_start_pos.y())
-            return QRect(x, y, width, height)
-        return QRect()
 
     def get_page_pixmap(self, page):
         zoom = 1.0
@@ -56,6 +51,15 @@ class PdfWidget(QWidget):
         img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(img)
         return pixmap
+    
+    def get_roi_rectangle(self):
+        if self.roi_start_pos and self.roi_end_pos:
+            x = min(self.roi_start_pos.x(), self.roi_end_pos.x())
+            y = min(self.roi_start_pos.y(), self.roi_end_pos.y())
+            width = abs(self.roi_end_pos.x() - self.roi_start_pos.x())
+            height = abs(self.roi_end_pos.y() - self.roi_start_pos.y())
+            return QRect(x, y, width, height)
+        return QRect()
 
     def mousePressEvent(self, event):
         if event.buttons() == Qt.LeftButton:

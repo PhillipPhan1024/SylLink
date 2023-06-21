@@ -2,8 +2,6 @@ from tabula import read_pdf
 from tabulate import tabulate
 import pandas as pd
 import sys
-import io
-import traceback
 from test_selection import coords as cds
 from test_selection import QApplication, PdfViewer, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog
 
@@ -28,8 +26,12 @@ def generate_checklist_table(dataframe):
 
     return checklist_table
 
+def read_custom_css(css_file):
+    with open(css_file, "r") as file:
+        css_content = file.read()
+    return css_content
 
-def generate_html_file(dataframe, filename):
+def generate_html_file(dataframe, filename, css_file="checklist.css"):
     checklist_table = generate_checklist_table(dataframe)
     headers = "\n".join([f"<th>{header}</th>" for header in dataframe.columns])
 
@@ -52,6 +54,7 @@ def generate_html_file(dataframe, filename):
             .completed {{
                 background-color: green;
             }}
+            {read_custom_css(css_file) if css_file else ''}
         </style>
         <script>
             function toggleRow(checkbox, row) {{
@@ -136,12 +139,4 @@ if __name__ == "__main__":
     app.aboutToQuit.connect(main)
     sys.exit(app.exec_())
 
-
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     pdf_path = 'Test_Syllabus.pdf'
-#     viewer = PdfViewer(pdf_path)
-#     coords = cds
-#     app.aboutToQuit.connect(main)
-#     sys.exit(app.exec_())
     
