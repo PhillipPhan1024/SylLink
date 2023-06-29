@@ -1,6 +1,4 @@
 from tabula import read_pdf
-from tabulate import tabulate
-import pandas as pd
 import sys
 from test_selection import coords as cds
 from test_selection import QApplication, PdfViewer
@@ -66,10 +64,22 @@ def generate_html_file(dataframe, filename, css_file="checklist.css"):
                     rows[row + 1].classList.remove('completed');
                 }}
             }}
+            
+            function toggleMode() {{
+                var body = document.getElementsByTagName('body')[0];
+                body.classList.toggle('dark-mode');
+            }}
         </script>
+        <style>
+            .dark-mode {{
+                background-color: #222;
+                color: #fff;
+            }}
+        </style>
     </head>
     <body>
         <h1>Checklist Table</h1>
+        <button onclick="toggleMode()">Toggle Mode</button>
         <table>
             <thead>
                 <tr>
@@ -85,16 +95,15 @@ def generate_html_file(dataframe, filename, css_file="checklist.css"):
     </html>
     """
 
-    with open(filename, "w") as file:
+    with open(filename, "w", encoding="utf-8") as file:
         file.write(html_content)
 
 
 def main():
     # Read only page 3 of the file
     print(coords)
-    quizzes = read_pdf('Test_Syllabus.pdf', pages=[3], multiple_tables=False, lattice=True, stream=True, area=coords)
+    quizzes = read_pdf('Test_Syllabus.pdf', pages=[3], multiple_tables=False, lattice=True, stream=True, area=coords, encoding='latin-1')
     df = quizzes[0]
-    # df = df[df["Quiz"].str.contains("Quiz")]
     generate_html_file(df, "checklist.html")
 
 
