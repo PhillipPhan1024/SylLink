@@ -48,6 +48,7 @@ def generate_html_file(dataframe, filename, css_file="checklist.css"):
             }}
             th {{
                 background-color: #f2f2f2;
+                color: #0080ff; /* Set the column title text color to #0080ff */
             }}
             .completed {{
                 background-color: green;
@@ -97,6 +98,7 @@ def generate_html_file(dataframe, filename, css_file="checklist.css"):
 
     with open(filename, "w", encoding="utf-8") as file:
         file.write(html_content)
+
 
 
 def main():
