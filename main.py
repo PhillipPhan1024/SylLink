@@ -29,7 +29,7 @@ def read_custom_css(css_file):
         css_content = file.read()
     return css_content
 
-def generate_html_file(dataframe, filename, css_file="checklist.css"):
+def generate_html_file(dataframe, filename, css_file="T:\VsCode\SylLink\SylLink\checklist.css"):
     checklist_table = generate_checklist_table(dataframe)
     headers = "\n".join([f"<th>{header}</th>" for header in dataframe.columns])
 
@@ -104,14 +104,14 @@ def generate_html_file(dataframe, filename, css_file="checklist.css"):
 def main():
     # Read only page 3 of the file
     print(coords)
-    quizzes = read_pdf('Test_Syllabus.pdf', pages=[3], multiple_tables=False, lattice=True, stream=True, area=coords, encoding='latin-1')
+    quizzes = read_pdf('T:\VsCode\SylLink\SylLink\Test_Syllabus.pdf', pages=[3], multiple_tables=False, lattice=True, stream=True, area=coords, encoding='latin-1')
     df = quizzes[0]
     generate_html_file(df, "checklist.html")
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    pdf_path = 'Test_Syllabus.pdf'
+    pdf_path = 'T:\VsCode\SylLink\SylLink\Test_Syllabus.pdf'
     viewer = PdfViewer(pdf_path)
     coords = cds
     app.aboutToQuit.connect(main)
