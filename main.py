@@ -33,7 +33,7 @@ def read_custom_css(css_file):
         css_content = file.read()
     return css_content
 
-def generate_html_file(dataframe, filename, css_file="T:\VsCode\SylLink\SylLink\checklist.css"):
+def generate_html_file(dataframe, filename, css_file="checklist.css"):
     checklist_table = generate_checklist_table(dataframe)
     headers = "\n".join([f"<th>{header}</th>" for header in dataframe.columns])
 
