@@ -2,7 +2,8 @@ import csv
 import requests
 from datetime import datetime, timezone
 
-# Set your Notion token and database ID
+NOTION_TOKEN = ""
+DATABASE_ID = ""
 
 headers = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
@@ -61,3 +62,23 @@ with open(csv_file, "r") as file:
 
 print("Pages creation completed.")
 
+
+# title = "Test Title"
+# description = "Test Description"
+# published_date = datetime.now().astimezone(timezone.utc).isoformat()
+# data = {
+#     "URL": {"title": [{"text": {"content": description}}]},
+#     "Title": {"rich_text": [{"text": {"content": title}}]},
+#     "Published": {"date": {"start": published_date, "end": None}}
+# }
+
+# create_page(data)
+
+page_id = "the page id"
+
+new_date = datetime(2023, 1, 15).astimezone(timezone.utc).isoformat()
+update_data = {"Published": {"date": {"start": new_date, "end": None}}}
+
+update_page(page_id, update_data)
+
+# delete_page(page_id)
