@@ -2,8 +2,8 @@ import csv
 import requests
 from datetime import datetime, timezone
 
-NOTION_TOKEN = ""
-DATABASE_ID = ""
+NOTION_TOKEN = "secret_Xsyg9tnPb0b9YX5MrwMjFC1QczOHn0dj7eUD4MjmXFA"
+DATABASE_ID = "c92fd11b1d6e43f78404898045e18d74"
 
 headers = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
@@ -31,54 +31,38 @@ def update_page(page_id: str, data: dict):
 # Example usage: read CSV file and create pages
 csv_file = "checklist.csv"  # Path to your CSV file
 
+rows = []
+csv_column_name = None
 with open(csv_file, "r") as file:
     csv_reader = csv.DictReader(file)
+    csv_column_name = csv_reader.fieldnames
     for row in csv_reader:
-        quiz = row["Quiz"]
-        topics_covered = row["Topics Covered"]
-        textbook_sections = row["Textbook Sections"]
-        date_closed = row["Date Closed"]
+        rows.append(row)
 
-        # Create the data dictionary based on the row values
-        data = {
-            "Quiz": {"title": [{"text": {"content": quiz}}]},
-            "Topics Covered": {"rich_text": [{"text": {"content": topics_covered}}]},
-            "Textbook Sections": {"rich_text": [{"text": {"content": textbook_sections}}]},
-            "Date Closed": {"rich_text": [{"text": {"content": date_closed}}]}
-        }
+# Iterate over rows in reverse order
+for row in reversed(rows):
+    quiz = row["Quiz"]
+    topics_covered = row["Topics Covered"]
+    textbook_sections = row["Textbook Sections"]
+    date_closed = row["Date Closed"]
 
-        # Create a new page in Notion with the data
-        response = create_page(data)
-        created_page = response
-        created_page_id = created_page["id"]
-        print(f"Created page with ID: {created_page_id}")
+    # Create the data dictionary based on the row values
+    data = {
+        "Quiz": {"title": [{"text": {"content": quiz}}]},
+        "Topics Covered": {"rich_text": [{"text": {"content": topics_covered}}]},
+        "Textbook Sections": {"rich_text": [{"text": {"content": textbook_sections}}]},
+        "Date Closed": {"rich_text": [{"text": {"content": date_closed}}]}
+    }
 
-        # You can also update the page here if needed
-        new_date = datetime.now().astimezone(timezone.utc).isoformat()
-        update_data = {"Date Closed": {"rich_text": [{"text": {"content": new_date}}]}}
-        response = update_page(created_page_id, update_data)
-        updated_page = response.json()
-        print(f"Updated page with ID: {created_page_id}")
+    # Create a new page in Notion with the data
+    response = create_page(data)
+    created_page = response
+    created_page_id = created_page["id"]
+    print(f"Created page with ID: {created_page_id}")
 
-print("Pages creation completed.")
-
-
-# title = "Test Title"
-# description = "Test Description"
-# published_date = datetime.now().astimezone(timezone.utc).isoformat()
-# data = {
-#     "URL": {"title": [{"text": {"content": description}}]},
-#     "Title": {"rich_text": [{"text": {"content": title}}]},
-#     "Published": {"date": {"start": published_date, "end": None}}
-# }
-
-# create_page(data)
-
-page_id = "the page id"
-
-new_date = datetime(2023, 1, 15).astimezone(timezone.utc).isoformat()
-update_data = {"Published": {"date": {"start": new_date, "end": None}}}
-
-update_page(page_id, update_data)
-
-# delete_page(page_id)
+    # You can also update the page here if needed
+    # new_date = datetime.now().astimezone(timezone.utc).isoformat()
+    # update_data = {"Date Closed": {"rich_text": [{"text": {"content": new_date}}]}}
+    # response = update_page(created_page_id, update_data)
+    # updated_page = response.json()
+    # print(f"Updated page with ID: {created_page_id}")
