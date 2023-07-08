@@ -4,6 +4,7 @@ from test_selection import coords as cds
 from test_selection import QApplication, PdfViewer
 import tkinter as tk
 from tkinter import filedialog
+from notion import create_database
 
 #TODO:
 # Create a GUI system to select page
@@ -30,6 +31,7 @@ def main():
     quizzes = read_pdf(file_path, pages=[3], multiple_tables=False, lattice=True, stream=True, area=coords, encoding='latin-1')
     df = quizzes[0]
     generate_csv_file(df, "checklist.csv")
+    create_database() # from notion.py
 
 
 if __name__ == "__main__":
